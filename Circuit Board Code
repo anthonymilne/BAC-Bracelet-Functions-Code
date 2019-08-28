@@ -1,0 +1,57 @@
+int state = 0;
+int timeout = -1;
+uint64_t acc = 0;
+uint64_t denom = 0;
+
+void setup() {
+  for(int i = 4; i < 8; i++) {
+    pinMode(i, OUTPUT);
+  }
+  for(int i = 0; i < 2; i++) {
+    pinMode(i, INPUT_PULLUP);
+  }
+  pinMode(2, INPUT);
+  digitalWrite(2, LOW);
+  pinMode(3, OUTPUT);
+  digitalWrite(3, LOW);
+}
+
+void loop() {
+  if(!digitalRead(1)) {// Angel Shot
+    state = 2;
+    timeout = 10000;
+  } else if(!digitalRead(0)) {// measure
+    state = 1;
+    timeout = 10000;
+    acc = 0;
+    denom = 0;
+  }
+  timeout --;
+  if(timeout == 0) {
+    state = 0;
+  }
+
+  switch(state) {
+    case 2:
+      digitalWrite(4, LOW);
+      for(int i = 5; i < 8; i++)digitalWrite(i, HIGH);
+      break;
+    case 1:
+      acc = max(1023-analogRead(2), acc);
+      if(acc > 865) {
+        digitalWrite(5, LOW);
+        for(int i = 6; i < 8; i++)digitalWrite(i, HIGH);
+      } else {
+        digitalWrite(7, LOW);
+        for(int i = 5; i < 7; i++)digitalWrite(i, HIGH);
+      }
+      break;
+    case 0:
+      acc = 0;
+      denom = 0;
+      for(int i = 4; i < 8; i++)digitalWrite(i, HIGH);
+  }
+  delay(1);
+}
+
+
